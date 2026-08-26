@@ -220,6 +220,7 @@ export default function App() {
         setLoaded(false);
         const { products: loadedProducts, entries: loadedEntries } = await loadStoreFirebase();
         
+        console.log("semangat sayang & selamat bekerja 💖");
         if (loadedProducts.length === 0) {
           DEFAULT_PRODUCTS.forEach(async (p) => {
             await setDoc(doc(db, "products", p.id), p);
@@ -396,7 +397,7 @@ export default function App() {
       </div>
     );
   }
-
+  
   // JIKA SUDAH LOGIN TAPI DATA SEDANG DIAMBIL DARI FIREBASE
   if (!loaded) return <div style={{ padding: 40, textAlign: "center", fontFamily: "sans-serif" }}>Memuat database Firebase...</div>;
 
@@ -410,7 +411,6 @@ export default function App() {
     }}>
       {globalStyles}
 
-input produksi
       {/* header */}
       <div style={{ background: "var(--ink)", color: "#fff", padding: "20px 28px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
