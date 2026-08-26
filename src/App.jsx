@@ -410,7 +410,7 @@ export default function App() {
     }}>
       {globalStyles}
 
-semua bulan
+input produksi
       {/* header */}
       <div style={{ background: "var(--ink)", color: "#fff", padding: "20px 28px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
@@ -511,10 +511,10 @@ semua bulan
                       <table>
                         <thead>
                           <tr>
-                            <th>Tanggal</th><th>Batch</th><th>Hasil Packing</th><th>Massa Kotor (g)</th>
-                            <th>Berat Bersih (g)</th><th>+Bulk (g)</th><th>Standar (g)</th><th>-/+ (g)</th>
-                            <th>%Waste Adonan</th><th>Total Pcs</th><th>Gramasi/pcs</th>
-                            <th>%Waste Bawah</th><th>%Waste Atas</th><th></th>
+                            <th>Tanggal</th><th>Batch</th><th>Hasil Packing</th><th>Jumlah Pcs</th><th>Massa Kotor (g)</th><th>Berat per Pack (g)</th><th>Berat Plastik klip (g)</th><th>Berat Plastik Roll (g)</th>
+                            <th>Berat Bersih (g)</th><th>Total Berat Bersih (g)</th><th>+Bulk (g)</th><th>Berat Bersih Standar (g)</th><th>-/+ (g)</th>
+                            <th>%Waste Adonan</th><th>Sisa Pcs</th><th>Total Pcs</th><th>Rata-Rata per Batch</th><th>Gramasi/pcs</th>
+                            <th>Batas Bawah</th><th>%Waste Bawah</th><th>Batas atas</th><th>%Waste Atas</th><th>Jumlah aktual pcs <br/>jika sisa bulk dianggap pcs (pcs)</th><th>Total kekurangan</th><th></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -525,16 +525,27 @@ semua bulan
                                 <td>{e.tanggal}</td>
                                 <td className="num">{e.jumlahBatch}</td>
                                 <td className="num">{e.hasilPacking}</td>
+                                <td className="num">{fmtG(c.jumlahPcs)}</td>
                                 <td className="num">{fmtG(c.massaKotor)}</td>
+                                <td className="num">{fmtG(c.beratPerPack)}</td>
+                                <td className="num">{fmtG(c.plastikKlip)}</td>
+                                <td className="num">{fmtG(c.plastikRoll)}</td>
                                 <td className="num">{fmtG(c.beratBersih)}</td>
+                                <td className="num">{fmtG(c.totalBeratBersihBulk)}</td>
                                 <td className="num">{fmtG(c.bulkGram)}</td>
                                 <td className="num">{fmtG(c.beratBersihStandar)}</td>
                                 <td className="num" style={{ color: c.selisih < 0 ? "var(--danger)" : "var(--ok)" }}>{c.selisih >= 0 ? "+" : ""}{fmtG(c.selisih)}</td>
                                 <td className="num" style={{ fontWeight: 600, color: c.wasteAdonan < -0.005 ? "var(--danger)" : c.wasteAdonan < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(c.wasteAdonan)}</td>
+                                <td className="num">{fmtPcs(c.sisaPcs)}</td>
                                 <td className="num">{fmtPcs(c.totalPcs)}</td>
+                                <td className="num">{fmtPcs(c.rataRataPerBatch)}</td>
                                 <td className="num">{c.gramasiPerPcs.toFixed(2)}</td>
+                                <td className="num">{fmtPcs(c.batasBawah)}</td>
                                 <td className="num">{fmtPct(c.wasteBawah)}</td>
+                                <td className="num">{fmtPcs(c.batasAtas)}</td>
                                 <td className="num">{fmtPct(c.wasteAtas)}</td>
+                                <td className="num">{fmtPcs(c.jumlahAktualPcs)}</td>
+                                <td className="num">{fmtPcs(c.kekurangan)}</td>
                                 <td>
                                   <div style={{ display: "flex", gap: 3 }}>
                                     <button className="btn" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => openEditEntry(e)}>✎</button>
