@@ -365,7 +365,10 @@ const globalStyles = (
       table { border-collapse: collapse; width: 100%; }
       th, td { text-align: right; padding: 6px 10px; white-space: nowrap; font-size: 12.5px; }
       th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
-      thead th { position: sticky; top: 0; background: var(--accent2); color: #fff; font-weight: 500; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+      
+      /* Header tabel otomatis sticky di bawah elemen atas halaman */
+      thead th { position: sticky; top: 0; background: var(--accent2); color: #fff; font-weight: 500; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; z-index: 5; }
+      
       tbody tr:nth-child(even) { background: #FDF4F8; }
       tbody tr:hover { background: #FCE8F0; }
       .num { font-family: 'IBM Plex Mono', monospace; }
@@ -380,6 +383,12 @@ const globalStyles = (
       .modal { background:#fff; border-radius:14px; padding:24px; width:100%; max-width:480px; max-height:88vh; overflow:auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);}
       .tab { padding:10px 16px; border-radius:8px 8px 0 0; font-size:13px; font-weight:600; color: var(--sub); border:1px solid transparent; }
       .tab.active { background: var(--card); color: var(--accent2); border:1px solid var(--line); border-bottom-color: var(--card); }
+
+      /* Custom & Clean Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(184, 58, 112, 0.25); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(184, 58, 112, 0.5); }
     `}</style>
   );
 
@@ -419,7 +428,7 @@ const globalStyles = (
 
   return (
     <div style={{
-      "--ink": "#2D1520", "--sub": "#7A4D62", "--bg": "#FFEBB8", "--card": "#FFFFFF",
+      "--ink": "#2D1520", "--sub": "#7A4D62", "--bg": "#DE528C", "--card": "#FFFFFF",
       "--line": "#EED5E0", "--accent": "#DE528C", "--accent2": "#B83A70",
       "--ok": "#1E8F5F", "--warn": "#C77D19", "--danger": "#C4433B",
       minHeight: "100%", color: "var(--ink)", padding: "0 0 40px 0",
@@ -449,210 +458,233 @@ const globalStyles = (
       {/* MAIN CONTAINER (FULL WIDTH STACKED) */}
       <div style={{ padding: "18px 28px", display: "flex", flexDirection: "column", gap: 20 }}>
         
-        {/* TOP: PRODUCT LIST FULL WIDTH */}
-        <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
-            <div style={{ fontWeight: 600, fontSize: 14 }}>Daftar Varian Produk</div>
-            <button className="btn btn-primary" style={{ padding: "5px 12px", fontSize: 12 }} onClick={openNewProduct}>+ Tambah Produk Baru</button>
+        {/* STICKY CONTAINER UTAMA: Menggabungkan Produk List & Tabel dalam satu aliran sticky */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative" }}>
+          
+          {/* TOP: PRODUCT LIST STICKY */}
+          <div style={{ 
+            position: "sticky", 
+            top: "12px", 
+            zIndex: 40, 
+            background: "var(--card)", 
+            border: "1px solid var(--line)", 
+            borderRadius: 12, 
+            padding: 16, 
+            boxShadow: "0 10px 30px rgba(0,0,0,0.15)" 
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Daftar Varian Produk</div>
+              <button className="btn btn-primary" style={{ padding: "5px 12px", fontSize: 12 }} onClick={openNewProduct}>+ Tambah Produk Baru</button>
+            </div>
+
+            {products.length === 0 ? (
+              <div style={{ fontSize: 12.5, color: "var(--sub)", lineHeight: 1.5, padding: "10px 0" }}>
+                Belum ada produk. Tambahkan produk atau 
+                <button className="btn" style={{ marginLeft: 8, fontSize: 12 }} onClick={seedExample}>Muat contoh data</button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", maxHeight: 130, overflowY: "auto", paddingBottom: 4 }}>
+                {products.map((p) => {
+                  const isSelected = p.id === selectedProductId;
+                  return (
+                    <div key={p.id}
+                      onClick={() => setSelectedProductId(p.id)}
+                      style={{
+                        padding: "8px 14px", borderRadius: 8, cursor: "pointer",
+                        background: isSelected ? "#FCE8F0" : "#FAFAFA",
+                        border: isSelected ? "1px solid var(--accent)" : "1px solid var(--line)",
+                        display: "flex", alignItems: "center", gap: 10, transition: "0.2s"
+                      }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: isSelected ? "var(--accent2)" : "var(--ink)" }}>
+                          {p.kode || "(tanpa kode)"}
+                        </div>
+                        <div style={{ fontSize: 10.5, color: "var(--sub)" }}>{p.nama || "Varian"}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 4, marginLeft: 6 }}>
+                        <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); openEditProduct(p); }}>✎</button>
+                        <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); if (confirm("Hapus produk ini?")) deleteProduct(p.id); }}>✕</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* PARAMETER INFO DETAIL UNTUK PRODUK YANG DIPILIH */}
+            {selectedProduct && (
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--line)", display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, alignItems: "center" }}>
+                <span style={{ fontWeight: 600, color: "var(--accent2)" }}>Parameter {selectedProduct.kode}:</span>
+                <span>Standar/Batch: <b>{fmtG(selectedProduct.standarPerBatch)} g</b></span>
+                <span>Pcs/Pack: <b>{selectedProduct.pcsPerPack}</b></span>
+                <span>Klip/Pack: <b>{selectedProduct.plastikKlipPerPack} g</b></span>
+                <span>Roll/Pcs: <b>{selectedProduct.plastikRollPerPcs} g</b></span>
+                <span>Gramasi Bawah: <b>{selectedProduct.gramasiBawah} g</b></span>
+                <span>Gramasi Atas: <b>{selectedProduct.gramasiAtas} g</b></span>
+              </div>
+            )}
           </div>
 
-          {products.length === 0 ? (
-            <div style={{ fontSize: 12.5, color: "var(--sub)", lineHeight: 1.5, padding: "10px 0" }}>
-              Belum ada produk. Tambahkan produk atau 
-              <button className="btn" style={{ marginLeft: 8, fontSize: 12 }} onClick={seedExample}>Muat contoh data</button>
-            </div>
-          ) : (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {products.map((p) => {
-                const isSelected = p.id === selectedProductId;
-                return (
-                  <div key={p.id}
-                    onClick={() => setSelectedProductId(p.id)}
-                    style={{
-                      padding: "8px 14px", borderRadius: 8, cursor: "pointer",
-                      background: isSelected ? "#FCE8F0" : "#FAFAFA",
-                      border: isSelected ? "1px solid var(--accent)" : "1px solid var(--line)",
-                      display: "flex", alignItems: "center", gap: 10, transition: "0.2s"
-                    }}>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 13, color: isSelected ? "var(--accent2)" : "var(--ink)" }}>
-                        {p.kode || "(tanpa kode)"}
-                      </div>
-                      <div style={{ fontSize: 10.5, color: "var(--sub)" }}>{p.nama || "Varian"}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 4, marginLeft: 6 }}>
-                      <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); openEditProduct(p); }}>✎</button>
-                      <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); if (confirm("Hapus produk ini?")) deleteProduct(p.id); }}>✕</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* PARAMETER INFO DETAIL UNTUK PRODUK YANG DIPILIH */}
-          {selectedProduct && (
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--line)", display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, alignItems: "center" }}>
-              <span style={{ fontWeight: 600, color: "var(--accent2)" }}>Parameter {selectedProduct.kode}:</span>
-              <span>Standar/Batch: <b>{fmtG(selectedProduct.standarPerBatch)} g</b></span>
-              <span>Pcs/Pack: <b>{selectedProduct.pcsPerPack}</b></span>
-              <span>Klip/Pack: <b>{selectedProduct.plastikKlipPerPack} g</b></span>
-              <span>Roll/Pcs: <b>{selectedProduct.plastikRollPerPcs} g</b></span>
-              <span>Gramasi Bawah: <b>{selectedProduct.gramasiBawah} g</b></span>
-              <span>Gramasi Atas: <b>{selectedProduct.gramasiAtas} g</b></span>
-            </div>
-          )}
-        </div>
-
-        {/* BOTTOM: CONTENT & INPUT PRODUCTION */}
-        <div style={{ width: "100%" }}>
-          {!selectedProduct ? (
-            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 40, textAlign: "center", color: "var(--sub)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
-              Silakan pilih salah satu produk di atas terlebih dahulu.
-            </div>
-          ) : (
-            <>
-              {/* tabs */}
-              <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--line)" }}>
-                {[["input", "Input Produksi"], ["rekap", "Rekap Bulanan"], ["semua", "Semua Produk"]].map(([id, label]) => (
-                  <div key={id} className={"tab" + (tab === id ? " active" : "")} onClick={() => setTab(id)}>{label}</div>
-                ))}
+          {/* BOTTOM: CONTENT & INPUT PRODUCTION */}
+          <div style={{ width: "100%" }}>
+            {!selectedProduct ? (
+              <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 40, textAlign: "center", color: "var(--sub)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+                Silakan pilih salah satu produk di atas terlebih dahulu.
               </div>
+            ) : (
+              <>
+                {/* tabs */}
+                <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--line)" }}>
+                  {[["input", "Input Produksi"], ["rekap", "Rekap Bulanan"], ["semua", "Semua Produk"]].map(([id, label]) => (
+                    <div key={id} className={"tab" + (tab === id ? " active" : "")} onClick={() => setTab(id)}>{label}</div>
+                  ))}
+                </div>
 
-              <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: 18, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
-                {tab === "input" && (
-                  <>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid var(--line)", fontSize: 12.5, background: "#fff", color: "var(--ink)" }}>
-                          <option value="">Semua bulan</option>
-                          {monthly.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
-                        </select>
-                        <span style={{ fontSize: 12, color: "var(--sub)" }}>{filteredEntries.length} produksi tercatat</span>
+                <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: 18, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+                  {tab === "input" && (
+                    <>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid var(--line)", fontSize: 12.5, background: "#fff", color: "var(--ink)" }}>
+                            <option value="">Semua bulan</option>
+                            {monthly.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+                          </select>
+                          <span style={{ fontSize: 12, color: "var(--sub)" }}>{filteredEntries.length} produksi tercatat</span>
+                        </div>
+                        <button className="btn btn-primary" onClick={openNewEntry}>+ Catat Produksi</button>
                       </div>
-                      <button className="btn btn-primary" onClick={openNewEntry}>+ Catat Produksi</button>
-                    </div>
-                    <div style={{ overflowX: "auto", maxHeight: 560, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 8 }}>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Tanggal</th><th>Batch</th><th>Hasil Packing</th><th>Jumlah Pcs</th><th>Massa Kotor (g)</th><th>Berat per Pack (g)</th><th>Berat Plastik klip (g)</th><th>Berat Plastik Roll (g)</th>
-                            <th>Berat Bersih (g)</th><th>Total Berat Bersih (g)</th><th>+Bulk (g)</th><th>Berat Bersih Standar (g)</th><th>-/+ (g)</th>
-                            <th>%Waste Adonan</th><th>Sisa Pcs</th><th>Total Pcs</th><th>Rata-Rata per Batch</th><th>Gramasi/pcs</th>
-                            <th>Batas Bawah</th><th>%Waste Bawah</th><th>Batas atas</th><th>%Waste Atas</th><th>Jumlah aktual pcs</th><th>Total kekurangan</th><th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredEntries.map((e) => {
-                            const c = computeRow(e, selectedProduct);
-                            return (
-                              <tr key={e.id}>
-                                <td>{e.tanggal}</td>
-                                <td className="num">{e.jumlahBatch}</td>
-                                <td className="num">{e.hasilPacking}</td>
-                                <td className="num">{fmtG(c.jumlahPcs)}</td>
-                                <td className="num">{fmtG(c.massaKotor)}</td>
-                                <td className="num">{fmtG(c.beratPerPack)}</td>
-                                <td className="num">{fmtG(c.plastikKlip)}</td>
-                                <td className="num">{fmtG(c.plastikRoll)}</td>
-                                <td className="num">{fmtG(c.beratBersih)}</td>
-                                <td className="num">{fmtG(c.totalBeratBersihBulk)}</td>
-                                <td className="num">{fmtG(c.bulkGram)}</td>
-                                <td className="num">{fmtG(c.beratBersihStandar)}</td>
-                                <td className="num" style={{ color: c.selisih < 0 ? "var(--danger)" : "var(--ok)" }}>{c.selisih >= 0 ? "+" : ""}{fmtG(c.selisih)}</td>
-                                <td className="num" style={{ fontWeight: 600, color: c.wasteAdonan < -0.005 ? "var(--danger)" : c.wasteAdonan < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(c.wasteAdonan)}</td>
-                                <td className="num">{fmtPcs(c.sisaPcs)}</td>
-                                <td className="num">{fmtPcs(c.totalPcs)}</td>
-                                <td className="num">{fmtPcs(c.rataRataPerBatch)}</td>
-                                <td className="num">{c.gramasiPerPcs.toFixed(2)}</td>
-                                <td className="num">{fmtPcs(c.batasBawah)}</td>
-                                <td className="num">{fmtPct(c.wasteBawah)}</td>
-                                <td className="num">{fmtPcs(c.batasAtas)}</td>
-                                <td className="num">{fmtPct(c.wasteAtas)}</td>
-                                <td className="num">{fmtPcs(c.jumlahAktualPcs)}</td>
-                                <td className="num">{fmtPcs(c.kekurangan)}</td>
-                                <td>
-                                  <div style={{ display: "flex", gap: 3 }}>
-                                    <button className="btn" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => openEditEntry(e)}>✎</button>
-                                    <button className="btn" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => { if (confirm("Hapus data produksi ini?")) deleteEntry(e.id); }}>✕</button>
-                                  </div>
-                                </td>
+                      
+                      {/* WRAPPER TABEL DENGAN STICKY HEADER OTOMATIS DI DALAM SCROLL CONTAINER */}
+                      <div style={{ 
+                        overflowX: "auto", 
+                        maxHeight: 560, 
+                        overflowY: "auto", 
+                        border: "1px solid var(--line)", 
+                        borderRadius: 8,
+                        position: "relative" 
+                      }}>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Tanggal</th><th>Batch</th><th>Hasil Packing</th><th>Jumlah Pcs</th><th>Massa Kotor (g)</th><th>Berat per Pack (g)</th><th>Berat Plastik klip (g)</th><th>Berat Plastik Roll (g)</th>
+                              <th>Berat Bersih (g)</th><th>Total Berat Bersih (g)</th><th>+Bulk (g)</th><th>Berat Bersih Standar (g)</th><th>-/+ (g)</th>
+                              <th>%Waste Adonan</th><th>Sisa Pcs</th><th>Total Pcs</th><th>Rata-Rata per Batch</th><th>Gramasi/pcs</th>
+                              <th>Batas Bawah</th><th>%Waste Bawah</th><th>Batas atas</th><th>%Waste Atas</th><th>Jumlah aktual pcs</th><th>Total kekurangan</th><th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredEntries.map((e) => {
+                              const c = computeRow(e, selectedProduct);
+                              return (
+                                <tr key={e.id}>
+                                  <td>{e.tanggal}</td>
+                                  <td className="num">{e.jumlahBatch}</td>
+                                  <td className="num">{e.hasilPacking}</td>
+                                  <td className="num">{fmtG(c.jumlahPcs)}</td>
+                                  <td className="num">{fmtG(c.massaKotor)}</td>
+                                  <td className="num">{fmtG(c.beratPerPack)}</td>
+                                  <td className="num">{fmtG(c.plastikKlip)}</td>
+                                  <td className="num">{fmtG(c.plastikRoll)}</td>
+                                  <td className="num">{fmtG(c.beratBersih)}</td>
+                                  <td className="num">{fmtG(c.totalBeratBersihBulk)}</td>
+                                  <td className="num">{fmtG(c.bulkGram)}</td>
+                                  <td className="num">{fmtG(c.beratBersihStandar)}</td>
+                                  <td className="num" style={{ color: c.selisih < 0 ? "var(--danger)" : "var(--ok)" }}>{c.selisih >= 0 ? "+" : ""}{fmtG(c.selisih)}</td>
+                                  <td className="num" style={{ fontWeight: 600, color: c.wasteAdonan < -0.005 ? "var(--danger)" : c.wasteAdonan < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(c.wasteAdonan)}</td>
+                                  <td className="num">{fmtPcs(c.sisaPcs)}</td>
+                                  <td className="num">{fmtPcs(c.totalPcs)}</td>
+                                  <td className="num">{fmtPcs(c.rataRataPerBatch)}</td>
+                                  <td className="num">{c.gramasiPerPcs.toFixed(2)}</td>
+                                  <td className="num">{fmtPcs(c.batasBawah)}</td>
+                                  <td className="num">{fmtPct(c.wasteBawah)}</td>
+                                  <td className="num">{fmtPcs(c.batasAtas)}</td>
+                                  <td className="num">{fmtPct(c.wasteAtas)}</td>
+                                  <td className="num">{fmtPcs(c.jumlahAktualPcs)}</td>
+                                  <td className="num">{fmtPcs(c.kekurangan)}</td>
+                                  <td>
+                                    <div style={{ display: "flex", gap: 3 }}>
+                                      <button className="btn" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => openEditEntry(e)}>✎</button>
+                                      <button className="btn" style={{ padding: "2px 6px", fontSize: 11 }} onClick={() => { if (confirm("Hapus data produksi ini?")) deleteEntry(e.id); }}>✕</button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            {filteredEntries.length === 0 && (
+                              <tr><td colSpan={24} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data produksi untuk bulan ini.</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+
+                  {tab === "rekap" && (
+                    <>
+                      {lastMonth && (
+                        <div style={{ display: "flex", gap: 28, justifyContent: "center", padding: "8px 0 20px", flexWrap: "wrap", borderBottom: "1px dashed var(--line)", marginBottom: 18 }}>
+                          <WasteGauge value={lastMonth.wasteAdonanTotal} label={`Waste Adonan · ${lastMonth.label}`} />
+                          <WasteGauge value={lastMonth.wasteBawahTotal} label={`Waste Batas Bawah · ${lastMonth.label}`} />
+                          <WasteGauge value={lastMonth.wasteAtasTotal} label={`Waste Batas Atas · ${lastMonth.label}`} />
+                        </div>
+                      )}
+                      <div style={{ overflowX: "auto" }}>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Bulan</th><th>Hari Produksi</th><th>Total Berat Bersih (g)</th><th>Total Standar (g)</th>
+                              <th>%Waste Adonan</th><th>Hasil (Pack)</th><th>Hasil (Pcs)</th><th>Rata² /batch (pcs)</th>
+                              <th>%Waste Batas Bawah</th><th>%Waste Batas Atas</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {monthly.map((m) => (
+                              <tr key={m.key}>
+                                <td>{m.label}</td>
+                                <td className="num">{m.jumlahHari}</td>
+                                <td className="num">{fmtG(m.totalBeratBersih)}</td>
+                                <td className="num">{fmtG(m.totalBeratStandar)}</td>
+                                <td className="num" style={{ fontWeight: 700, color: m.wasteAdonanTotal < -0.005 ? "var(--danger)" : m.wasteAdonanTotal < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(m.wasteAdonanTotal)}</td>
+                                <td className="num">{fmtG(m.totalPack)}</td>
+                                <td className="num">{fmtPcs(m.totalPcs)}</td>
+                                <td className="num">{m.rataRataPcs.toFixed(1)}</td>
+                                <td className="num">{fmtPct(m.wasteBawahTotal)}</td>
+                                <td className="num">{fmtPct(m.wasteAtasTotal)}</td>
                               </tr>
-                            );
-                          })}
-                          {filteredEntries.length === 0 && (
-                            <tr><td colSpan={24} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data produksi untuk bulan ini.</td></tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
-                )}
-
-                {tab === "rekap" && (
-                  <>
-                    {lastMonth && (
-                      <div style={{ display: "flex", gap: 28, justifyContent: "center", padding: "8px 0 20px", flexWrap: "wrap", borderBottom: "1px dashed var(--line)", marginBottom: 18 }}>
-                        <WasteGauge value={lastMonth.wasteAdonanTotal} label={`Waste Adonan · ${lastMonth.label}`} />
-                        <WasteGauge value={lastMonth.wasteBawahTotal} label={`Waste Batas Bawah · ${lastMonth.label}`} />
-                        <WasteGauge value={lastMonth.wasteAtasTotal} label={`Waste Batas Atas · ${lastMonth.label}`} />
+                            ))}
+                            {monthly.length === 0 && (
+                              <tr><td colSpan={10} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data.</td></tr>
+                            )}
+                          </tbody>
+                        </table>
                       </div>
-                    )}
+                    </>
+                  )}
+
+                  {tab === "semua" && (
                     <div style={{ overflowX: "auto" }}>
+                      <div style={{ fontSize: 12.5, color: "var(--sub)", marginBottom: 10 }}>Rata-rata %waste adonan seluruh produk, per bulan.</div>
                       <table>
-                        <thead>
-                          <tr>
-                            <th>Bulan</th><th>Hari Produksi</th><th>Total Berat Bersih (g)</th><th>Total Standar (g)</th>
-                            <th>%Waste Adonan</th><th>Hasil (Pack)</th><th>Hasil (Pcs)</th><th>Rata² /batch (pcs)</th>
-                            <th>%Waste Batas Bawah</th><th>%Waste Batas Atas</th>
-                          </tr>
-                        </thead>
+                        <thead><tr><th>Bulan</th><th>Rata-Rata %Waste Adonan (semua produk)</th></tr></thead>
                         <tbody>
-                          {monthly.map((m) => (
+                          {overallByMonth.map((m) => (
                             <tr key={m.key}>
                               <td>{m.label}</td>
-                              <td className="num">{m.jumlahHari}</td>
-                              <td className="num">{fmtG(m.totalBeratBersih)}</td>
-                              <td className="num">{fmtG(m.totalBeratStandar)}</td>
-                              <td className="num" style={{ fontWeight: 700, color: m.wasteAdonanTotal < -0.005 ? "var(--danger)" : m.wasteAdonanTotal < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(m.wasteAdonanTotal)}</td>
-                              <td className="num">{fmtG(m.totalPack)}</td>
-                              <td className="num">{fmtPcs(m.totalPcs)}</td>
-                              <td className="num">{m.rataRataPcs.toFixed(1)}</td>
-                              <td className="num">{fmtPct(m.wasteBawahTotal)}</td>
-                              <td className="num">{fmtPct(m.wasteAtasTotal)}</td>
+                              <td className="num" style={{ fontWeight: 700, color: m.avg < -0.005 ? "var(--danger)" : m.avg < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(m.avg)}</td>
                             </tr>
                           ))}
-                          {monthly.length === 0 && (
-                            <tr><td colSpan={10} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data.</td></tr>
+                          {overallByMonth.length === 0 && (
+                            <tr><td colSpan={2} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data.</td></tr>
                           )}
                         </tbody>
                       </table>
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
+              </>
+            )}
+          </div>
 
-                {tab === "semua" && (
-                  <div style={{ overflowX: "auto" }}>
-                    <div style={{ fontSize: 12.5, color: "var(--sub)", marginBottom: 10 }}>Rata-rata %waste adonan seluruh produk, per bulan.</div>
-                    <table>
-                      <thead><tr><th>Bulan</th><th>Rata-Rata %Waste Adonan (semua produk)</th></tr></thead>
-                      <tbody>
-                        {overallByMonth.map((m) => (
-                          <tr key={m.key}>
-                            <td>{m.label}</td>
-                            <td className="num" style={{ fontWeight: 700, color: m.avg < -0.005 ? "var(--danger)" : m.avg < 0 ? "var(--warn)" : "var(--ok)" }}>{fmtPct(m.avg)}</td>
-                          </tr>
-                        ))}
-                        {overallByMonth.length === 0 && (
-                          <tr><td colSpan={2} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
         </div>
 
       </div>
