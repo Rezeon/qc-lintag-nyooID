@@ -355,19 +355,19 @@ export default function App() {
     : productEntries;
 
   // Global CSS Injection
-  const globalStyles = (
+const globalStyles = (
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
       * { box-sizing: border-box; }
-      body { margin: 0; padding: 0; background: #F1F4F3; font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif; }
+      body { margin: 0; padding: 0; background: #DE528C; font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif; }
       input, select { font-family: 'Space Grotesk', sans-serif; color: #132226; }
       button { cursor: pointer; font-family: 'Space Grotesk', sans-serif; color: #132226; }
       table { border-collapse: collapse; width: 100%; }
       th, td { text-align: right; padding: 6px 10px; white-space: nowrap; font-size: 12.5px; }
       th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { text-align: left; }
       thead th { position: sticky; top: 0; background: var(--accent2); color: #fff; font-weight: 500; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
-      tbody tr:nth-child(even) { background: #F7FAF9; }
-      tbody tr:hover { background: #EAF4F2; }
+      tbody tr:nth-child(even) { background: #FDF4F8; }
+      tbody tr:hover { background: #FCE8F0; }
       .num { font-family: 'IBM Plex Mono', monospace; }
       .btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--ink); transition: 0.2s; }
       .btn:hover { border-color: var(--accent); color: var(--accent2); }
@@ -376,26 +376,24 @@ export default function App() {
       .field label { display:block; font-size: 11px; text-transform: uppercase; letter-spacing:.06em; color: var(--sub); margin-bottom:4px; }
       .field input, .field select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:7px; font-size:14px; background:#fff; color: var(--ink); }
       .field input:focus, .field select:focus { outline:2px solid var(--accent); outline-offset:1px; border-color: var(--accent); }
-      .modal-backdrop { position:fixed; inset:0; background:rgba(15,30,29,0.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
+      .modal-backdrop { position:fixed; inset:0; background:rgba(40,10,25,0.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
       .modal { background:#fff; border-radius:14px; padding:24px; width:100%; max-width:480px; max-height:88vh; overflow:auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);}
       .tab { padding:10px 16px; border-radius:8px 8px 0 0; font-size:13px; font-weight:600; color: var(--sub); border:1px solid transparent; }
       .tab.active { background: var(--card); color: var(--accent2); border:1px solid var(--line); border-bottom-color: var(--card); }
     `}</style>
   );
 
-  // Jika sistem sedang mengecek status autentikasi dari cache browser
-  if (authChecking) return <div style={{ padding: 40, textAlign: "center", fontFamily: "sans-serif" }}>Memeriksa sesi login...</div>;
+  if (authChecking) return <div style={{ padding: 40, textAlign: "center", color: "#fff", fontFamily: "sans-serif" }}>Memeriksa sesi login...</div>;
 
-  // LAYAR LOGIN (JIKA BELUM LOGIN)
   if (!user) {
     return (
       <div style={{
-        "--ink": "#132226", "--sub": "#5B6E70", "--bg": "#F1F4F3", "--card": "#FFFFFF",
-        "--line": "#DCE3E1", "--accent": "#0E7C7B", "--accent2": "#0A5C5B",
-        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)"
+        "--ink": "#132226", "--sub": "#6B4858", "--bg": "#DE528C", "--card": "#FFFFFF",
+        "--line": "#EED5E0", "--accent": "#DE528C", "--accent2": "#B83A70",
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)"
       }}>
         {globalStyles}
-        <div style={{ background: "var(--card)", padding: 40, borderRadius: 16, textAlign: "center", maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+        <div style={{ background: "var(--card)", padding: 40, borderRadius: 16, textAlign: "center", maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
           <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--sub)", marginBottom: 8 }}>Joocy Juice &amp; Saus</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", marginBottom: 20 }}>Kalkulator Mass Balance</div>
           
@@ -417,91 +415,100 @@ export default function App() {
     );
   }
   
-  // JIKA SUDAH LOGIN TAPI DATA SEDANG DIAMBIL DARI FIREBASE
-  if (!loaded) return <div style={{ padding: 40, textAlign: "center", fontFamily: "sans-serif" }}>Memuat database Firebase...</div>;
+  if (!loaded) return <div style={{ padding: 40, textAlign: "center", color: "#fff", fontFamily: "sans-serif" }}>Memuat database Firebase...</div>;
 
-  // TAMPILAN UTAMA APLIKASI
   return (
     <div style={{
-      "--ink": "#132226", "--sub": "#5B6E70", "--bg": "#F1F4F3", "--card": "#FFFFFF",
-      "--line": "#DCE3E1", "--accent": "#0E7C7B", "--accent2": "#0A5C5B",
+      "--ink": "#2D1520", "--sub": "#7A4D62", "--bg": "#FFEBB8", "--card": "#FFFFFF",
+      "--line": "#EED5E0", "--accent": "#DE528C", "--accent2": "#B83A70",
       "--ok": "#1E8F5F", "--warn": "#C77D19", "--danger": "#C4433B",
       minHeight: "100%", color: "var(--ink)", padding: "0 0 40px 0",
+      background: "var(--bg)",
     }}>
       {globalStyles}
 
       {/* header */}
-      <div style={{ background: "var(--ink)", color: "#fff", padding: "20px 28px" }}>
+      <div style={{ background: "var(--accent2)", color: "#fff", padding: "20px 28px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
           <div>
-            <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8FBDBA" }}>Mass Balance · Joocy Juice &amp; Saus</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "#FAD2E2" }}>Mass Balance Salad Nyoo · Joocy Juice &amp; Saus</div>
             <div style={{ fontSize: 24, fontWeight: 700 }}>Kalkulator Waste Adonan</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ textAlign: "right", display: "none", "@media(minWidth: 600px)": { display: "block" } }}>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{user.displayName || "Admin"}</div>
-              <div style={{ fontSize: 11, color: "#8FBDBA" }}>{user.email}</div>
+              <div style={{ fontSize: 11, color: "#FAD2E2" }}>{user.email}</div>
             </div>
-            <button className="btn" style={{ background: "transparent", color: "#fff", borderColor: "#8FBDBA", padding: "6px 12px", fontSize: 12 }} onClick={handleLogout}>
+            <button className="btn" style={{ background: "transparent", color: "#fff", borderColor: "#FAD2E2", padding: "6px 12px", fontSize: 12 }} onClick={handleLogout}>
               Logout
             </button>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: "18px 28px", display: "flex", gap: 20, flexWrap: "wrap" }}>
-        {/* left: product list */}
-        <div style={{ width: 250, flexShrink: 0 }}>
-          <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>Produk</div>
-              <button className="btn" style={{ padding: "4px 9px", fontSize: 12 }} onClick={openNewProduct}>+ Baru</button>
-            </div>
-            {products.length === 0 && (
-              <div style={{ fontSize: 12.5, color: "var(--sub)", lineHeight: 1.5 }}>
-                Belum ada produk. Tambahkan produk (kode varian, standar adonan per batch, dsb) atau
-                <div><button className="btn" style={{ marginTop: 8, fontSize: 12 }} onClick={seedExample}>Muat contoh data</button></div>
-              </div>
-            )}
-            {products.map((p) => (
-              <div key={p.id}
-                onClick={() => setSelectedProductId(p.id)}
-                style={{
-                  padding: "8px 10px", borderRadius: 8, cursor: "pointer", marginBottom: 4,
-                  background: p.id === selectedProductId ? "#E4F2F0" : "transparent",
-                  border: p.id === selectedProductId ? "1px solid var(--accent)" : "1px solid transparent",
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{p.kode || "(tanpa kode)"}</div>
-                  <div style={{ fontSize: 11, color: "var(--sub)" }}>{p.nama || "-"}</div>
-                </div>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <button className="btn" style={{ padding: "3px 7px", fontSize: 11 }} onClick={(ev) => { ev.stopPropagation(); openEditProduct(p); }}>✎</button>
-                  <button className="btn" style={{ padding: "3px 7px", fontSize: 11 }} onClick={(ev) => { ev.stopPropagation(); if (confirm("Hapus produk ini beserta seluruh data produksinya?")) deleteProduct(p.id); }}>✕</button>
-                </div>
-              </div>
-            ))}
+      {/* MAIN CONTAINER (FULL WIDTH STACKED) */}
+      <div style={{ padding: "18px 28px", display: "flex", flexDirection: "column", gap: 20 }}>
+        
+        {/* TOP: PRODUCT LIST FULL WIDTH */}
+        <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 16, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Daftar Varian Produk</div>
+            <button className="btn btn-primary" style={{ padding: "5px 12px", fontSize: 12 }} onClick={openNewProduct}>+ Tambah Produk Baru</button>
           </div>
 
+          {products.length === 0 ? (
+            <div style={{ fontSize: 12.5, color: "var(--sub)", lineHeight: 1.5, padding: "10px 0" }}>
+              Belum ada produk. Tambahkan produk atau 
+              <button className="btn" style={{ marginLeft: 8, fontSize: 12 }} onClick={seedExample}>Muat contoh data</button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {products.map((p) => {
+                const isSelected = p.id === selectedProductId;
+                return (
+                  <div key={p.id}
+                    onClick={() => setSelectedProductId(p.id)}
+                    style={{
+                      padding: "8px 14px", borderRadius: 8, cursor: "pointer",
+                      background: isSelected ? "#FCE8F0" : "#FAFAFA",
+                      border: isSelected ? "1px solid var(--accent)" : "1px solid var(--line)",
+                      display: "flex", alignItems: "center", gap: 10, transition: "0.2s"
+                    }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: isSelected ? "var(--accent2)" : "var(--ink)" }}>
+                        {p.kode || "(tanpa kode)"}
+                      </div>
+                      <div style={{ fontSize: 10.5, color: "var(--sub)" }}>{p.nama || "Varian"}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 4, marginLeft: 6 }}>
+                      <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); openEditProduct(p); }}>✎</button>
+                      <button className="btn" style={{ padding: "2px 5px", fontSize: 10 }} onClick={(ev) => { ev.stopPropagation(); if (confirm("Hapus produk ini?")) deleteProduct(p.id); }}>✕</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* PARAMETER INFO DETAIL UNTUK PRODUK YANG DIPILIH */}
           {selectedProduct && (
-            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 14, marginTop: 14, fontSize: 12 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Parameter {selectedProduct.kode}</div>
-              <Row k="Standar / batch" v={fmtG(selectedProduct.standarPerBatch) + " g"} />
-              <Row k="Pcs / pack" v={selectedProduct.pcsPerPack} />
-              <Row k="Klip plastik / pack" v={selectedProduct.plastikKlipPerPack + " g"} />
-              <Row k="Roll plastik / pcs" v={selectedProduct.plastikRollPerPcs + " g"} />
-              <Row k="Gramasi bawah" v={selectedProduct.gramasiBawah + " g"} />
-              <Row k="Gramasi atas" v={selectedProduct.gramasiAtas + " g"} />
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--line)", display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, alignItems: "center" }}>
+              <span style={{ fontWeight: 600, color: "var(--accent2)" }}>Parameter {selectedProduct.kode}:</span>
+              <span>Standar/Batch: <b>{fmtG(selectedProduct.standarPerBatch)} g</b></span>
+              <span>Pcs/Pack: <b>{selectedProduct.pcsPerPack}</b></span>
+              <span>Klip/Pack: <b>{selectedProduct.plastikKlipPerPack} g</b></span>
+              <span>Roll/Pcs: <b>{selectedProduct.plastikRollPerPcs} g</b></span>
+              <span>Gramasi Bawah: <b>{selectedProduct.gramasiBawah} g</b></span>
+              <span>Gramasi Atas: <b>{selectedProduct.gramasiAtas} g</b></span>
             </div>
           )}
         </div>
 
-        {/* right: content */}
-        <div style={{ flex: 1, minWidth: 320 }}>
+        {/* BOTTOM: CONTENT & INPUT PRODUCTION */}
+        <div style={{ width: "100%" }}>
           {!selectedProduct ? (
-            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 40, textAlign: "center", color: "var(--sub)" }}>
-              Pilih atau buat produk terlebih dahulu di panel kiri.
+            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, padding: 40, textAlign: "center", color: "var(--sub)", boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
+              Silakan pilih salah satu produk di atas terlebih dahulu.
             </div>
           ) : (
             <>
@@ -512,13 +519,12 @@ export default function App() {
                 ))}
               </div>
 
-              <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: 18 }}>
+              <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: 18, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
                 {tab === "input" && (
                   <>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid var(--line)", fontSize: 12.5,background: "#fff",      // <-- Tambahan agar background putih
-              color: "var(--ink)" }}>
+                        <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} style={{ padding: "7px 10px", borderRadius: 7, border: "1px solid var(--line)", fontSize: 12.5, background: "#fff", color: "var(--ink)" }}>
                           <option value="">Semua bulan</option>
                           {monthly.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
                         </select>
@@ -533,7 +539,7 @@ export default function App() {
                             <th>Tanggal</th><th>Batch</th><th>Hasil Packing</th><th>Jumlah Pcs</th><th>Massa Kotor (g)</th><th>Berat per Pack (g)</th><th>Berat Plastik klip (g)</th><th>Berat Plastik Roll (g)</th>
                             <th>Berat Bersih (g)</th><th>Total Berat Bersih (g)</th><th>+Bulk (g)</th><th>Berat Bersih Standar (g)</th><th>-/+ (g)</th>
                             <th>%Waste Adonan</th><th>Sisa Pcs</th><th>Total Pcs</th><th>Rata-Rata per Batch</th><th>Gramasi/pcs</th>
-                            <th>Batas Bawah</th><th>%Waste Bawah</th><th>Batas atas</th><th>%Waste Atas</th><th>Jumlah aktual pcs <br/>jika sisa bulk dianggap pcs (pcs)</th><th>Total kekurangan</th><th></th>
+                            <th>Batas Bawah</th><th>%Waste Bawah</th><th>Batas atas</th><th>%Waste Atas</th><th>Jumlah aktual pcs</th><th>Total kekurangan</th><th></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -575,7 +581,7 @@ export default function App() {
                             );
                           })}
                           {filteredEntries.length === 0 && (
-                            <tr><td colSpan={14} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data produksi untuk bulan ini.</td></tr>
+                            <tr><td colSpan={24} style={{ textAlign: "center", color: "var(--sub)", padding: 20 }}>Belum ada data produksi untuk bulan ini.</td></tr>
                           )}
                         </tbody>
                       </table>
@@ -627,7 +633,7 @@ export default function App() {
 
                 {tab === "semua" && (
                   <div style={{ overflowX: "auto" }}>
-                    <div style={{ fontSize: 12.5, color: "var(--sub)", marginBottom: 10 }}>Rata-rata %waste adonan seluruh produk, per bulan (setara sheet RECAP / GRAFIK).</div>
+                    <div style={{ fontSize: 12.5, color: "var(--sub)", marginBottom: 10 }}>Rata-rata %waste adonan seluruh produk, per bulan.</div>
                     <table>
                       <thead><tr><th>Bulan</th><th>Rata-Rata %Waste Adonan (semua produk)</th></tr></thead>
                       <tbody>
@@ -648,6 +654,7 @@ export default function App() {
             </>
           )}
         </div>
+
       </div>
 
       {/* product modal */}
@@ -691,7 +698,7 @@ export default function App() {
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
               <button className="btn" onClick={() => setProductForm(null)}>Batal</button>
-              <button className="btn btn-primary" onClick={() => { saveProductForm(); }}>Simpan</button>
+              <button className="btn btn-primary" onClick={saveProductForm}>Simpan</button>
             </div>
           </div>
         </div>
@@ -732,12 +739,12 @@ export default function App() {
                 <input type="number" value={entryForm.bulkGram} onChange={(e) => setEntryForm({ ...entryForm, bulkGram: e.target.value })} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <label>Berat Bersih Standar (g) — kosongkan untuk otomatis (batch × standar/batch)</label>
+                <label>Berat Bersih Standar (g) — kosongkan untuk otomatis</label>
                 <input type="number" value={entryForm.standarOverride} onChange={(e) => setEntryForm({ ...entryForm, standarOverride: e.target.value })} placeholder="otomatis" />
               </div>
             </div>
             {selectedProduct && (
-              <div style={{ marginTop: 12, fontSize: 12, color: "var(--sub)", background: "#F7FAF9", borderRadius: 8, padding: 10 }}>
+              <div style={{ marginTop: 12, fontSize: 12, color: "var(--sub)", background: "#FDF4F8", borderRadius: 8, padding: 10 }}>
                 Pratinjau: %waste adonan ≈ <b className="num">{fmtPct(computeRow(entryForm, selectedProduct).wasteAdonan)}</b>
               </div>
             )}
@@ -748,15 +755,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function Row({ k, v }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px dashed var(--line)" }}>
-      <span style={{ color: "var(--sub)" }}>{k}</span>
-      <span className="num" style={{ fontWeight: 600 }}>{v}</span>
     </div>
   );
 }
