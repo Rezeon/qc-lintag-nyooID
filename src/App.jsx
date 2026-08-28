@@ -10,6 +10,8 @@ const BULAN_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ];
+const encodedCode = import.meta.env.VITE_ACCESS_CODE_ENC || "Sk9PQ1kyMDI2"; 
+const ACCESS_CODE = atob(encodedCode);
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -194,6 +196,7 @@ function WasteGauge({ value, label }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [inputCode, setInputCode] = useState("");
 
   const [products, setProducts] = useState([]);
   const [entries, setEntries] = useState([]);
@@ -239,6 +242,10 @@ export default function App() {
   }, [user]);
 
   const handleLogin = async () => {
+    if (inputCode.trim() !== ACCESS_CODE) {
+      alert("Kode akses salah! Masukkan kode akses yang benar.");
+      return;
+    }
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
@@ -251,6 +258,7 @@ export default function App() {
     if (confirm("Yakin ingin logout?")) {
       try {
         await signOut(auth);
+        setInputCode(""); // Reset input kode saat logout
       } catch (error) {
         console.error("Error saat logout:", error);
       }
@@ -389,7 +397,18 @@ export default function App() {
         {globalStyles}
         <div style={{ background: "var(--card)", padding: 40, borderRadius: 16, textAlign: "center", maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
           <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--sub)", marginBottom: 8 }}>Joocy Juice &amp; Saus</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)", marginBottom: 30 }}>Kalkulator Mass Balance</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", marginBottom: 20 }}>Kalkulator Mass Balance</div>
+          
+          <div className="field" style={{ textAlign: "left", marginBottom: 16 }}>
+            <label>Masukkan Kode Akses</label>
+            <input 
+              type="password" 
+              placeholder="Contoh: Kode Akses" 
+              value={inputCode} 
+              onChange={(e) => setInputCode(e.target.value)} 
+            />
+          </div>
+
           <button className="btn btn-primary" style={{ width: "100%", padding: "12px", fontSize: 15 }} onClick={handleLogin}>
             Sign in with Google
           </button>
