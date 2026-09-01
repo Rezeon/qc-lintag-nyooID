@@ -124,6 +124,22 @@ function monthLabel(key) {
   return `${BULAN_ID[Number(m) - 1] || "?"} ${y}`;
 }
 
+// Nama sheet Excel maksimal 31 karakter & tidak boleh berisi : \ / ? * [ ]
+// Fungsi ini membersihkan nama & memastikan tidak ada nama sheet yang duplikat.
+function makeSafeSheetName(name, usedNames) {
+  let base = String(name).replace(/[:\\/?*[\]]/g, "-").trim() || "Sheet";
+  if (base.length > 31) base = base.slice(0, 31);
+  let finalName = base;
+  let counter = 2;
+  while (usedNames.has(finalName)) {
+    const suffix = ` (${counter})`;
+    finalName = base.slice(0, 31 - suffix.length) + suffix;
+    counter++;
+  }
+  usedNames.add(finalName);
+  return finalName;
+}
+
 function computeMonthly(entries, product) {
   const groups = {};
   entries.forEach((e) => {
@@ -389,6 +405,103 @@ const exportToExcel = () => {
     XLSX.writeFile(workbook, `MassBalance_${selectedProduct.kode}_${monthFilter || "Semua"}.xlsx`);
   };
 
+  // Export SEMUA produk sekaligus: tiap produk dapat 2 sheet (Input harian + Rekap Bulanan),
+  // ditambah 1 sheet ringkasan rata-rata waste adonan semua produk per bulan.
+  const exportAllToExcel = () => {
+    if (products.length === 0) {
+      alert("Belum ada produk untuk diexport!");
+      return;
+    }
+    if (entries.length === 0) {
+      alert("Belum ada data produksi untuk diexport!");
+      return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const usedNames = new Set();
+    let adaSheet = false;
+
+    products.forEach((p) => {
+      const prodEntries = entries
+        .filter((e) => e.productId === p.id)
+        .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+
+      if (prodEntries.length === 0) return;
+      adaSheet = true;
+      const label = p.kode || p.nama || "Produk";
+
+      // Sheet Input Produksi harian
+      const inputRows = prodEntries.map((e) => {
+        const c = computeRow(e, p);
+        return {
+          "Tanggal": e.tanggal,
+          "Jumlah Batch": c.jumlahBatch,
+          "Hasil Packing (Pack)": c.hasilPacking,
+          "Jumlah Pcs": c.jumlahPcs,
+          "Massa Kotor (g)": c.massaKotor,
+          "Berat per Pack (g)": c.beratPerPack,
+          "Plastik Klip (g)": c.plastikKlip,
+          "Plastik Roll (g)": c.plastikRoll,
+          "Berat Bersih (g)": c.beratBersih,
+          "Total Berat Bersih + Bulk (g)": c.totalBeratBersihBulk,
+          "Bulk (g)": c.bulkGram,
+          "Berat Bersih Standar (g)": c.beratBersihStandar,
+          "Selisih (-/+) (g)": c.selisih,
+          "% Waste Adonan": (c.wasteAdonan * 100).toFixed(2) + "%",
+          "Sisa Pcs": c.sisaPcs,
+          "Total Pcs": c.totalPcs,
+          "Rata-rata / Batch": c.rataRataPerBatch.toFixed(1),
+          "Gramasi / Pcs": c.gramasiPerPcs.toFixed(2),
+          "Batas Bawah": Math.round(c.batasBawah),
+          "% Waste Bawah": (c.wasteBawah * 100).toFixed(2) + "%",
+          "Batas Atas": Math.round(c.batasAtas),
+          "% Waste Atas": (c.wasteAtas * 100).toFixed(2) + "%",
+          "Jumlah Aktual Pcs": Math.round(c.jumlahAktualPcs),
+          "Total Kekurangan": Math.round(c.kekurangan),
+        };
+      });
+      const inputSheet = XLSX.utils.json_to_sheet(inputRows);
+      XLSX.utils.book_append_sheet(workbook, inputSheet, makeSafeSheetName(`${label} - Input`, usedNames));
+
+      // Sheet Rekap Bulanan produk ini
+      const monthlyRows = computeMonthly(prodEntries, p).map((m) => ({
+        "Bulan": m.label,
+        "Hari Produksi": m.jumlahHari,
+        "Total Berat Bersih (g)": Math.round(m.totalBeratBersih),
+        "Total Standar (g)": Math.round(m.totalBeratStandar),
+        "% Waste Adonan": (m.wasteAdonanTotal * 100).toFixed(2) + "%",
+        "Hasil (Pack)": Math.round(m.totalPack),
+        "Hasil (Pcs)": Math.round(m.totalPcs),
+        "Rata-rata / Batch (pcs)": m.rataRataPcs.toFixed(1),
+        "% Waste Batas Bawah": (m.wasteBawahTotal * 100).toFixed(2) + "%",
+        "% Waste Batas Atas": (m.wasteAtasTotal * 100).toFixed(2) + "%",
+      }));
+      if (monthlyRows.length > 0) {
+        const monthlySheet = XLSX.utils.json_to_sheet(monthlyRows);
+        XLSX.utils.book_append_sheet(workbook, monthlySheet, makeSafeSheetName(`${label} - Rekap`, usedNames));
+      }
+    });
+
+    // Sheet ringkasan semua produk (rata-rata %waste adonan per bulan, lintas produk)
+    if (overallByMonth.length > 0) {
+      const overallRows = overallByMonth.map((m) => ({
+        "Bulan": m.label,
+        "Rata-Rata % Waste Adonan (Semua Produk)": (m.avg * 100).toFixed(2) + "%",
+      }));
+      const overallSheet = XLSX.utils.json_to_sheet(overallRows);
+      XLSX.utils.book_append_sheet(workbook, overallSheet, makeSafeSheetName("Semua Produk - Rekap", usedNames));
+      adaSheet = true;
+    }
+
+    if (!adaSheet) {
+      alert("Tidak ada data untuk diexport!");
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `MassBalance_SemuaProduk_${today}.xlsx`);
+  };
+
   // Global CSS Injection
 const globalStyles = (
     <style>{`
@@ -588,9 +701,13 @@ const globalStyles = (
                         </div>
                         
                         <div style={{ display: "flex", gap: 8 }}>
-                          {/* TOMBOL DOWNLOAD EXCEL */}
+                          {/* TOMBOL DOWNLOAD EXCEL - produk & bulan yang sedang dipilih saja */}
                           <button className="btn" style={{ background: "#107C41", color: "#fff", borderColor: "#107C41", fontSize: 12 }} onClick={exportToExcel}>
-                            📊 Download Excel
+                            📊 Excel produk pilihan
+                          </button>
+                          {/* TOMBOL EXPORT SEMUA PRODUK - satu file berisi Input + Rekap Bulanan tiap produk + ringkasan Semua Produk */}
+                          <button className="btn" style={{ background: "#0B5E31", color: "#fff", borderColor: "#0B5E31", fontSize: 12 }} onClick={exportAllToExcel} title="Export semua produk beserta rekap bulanannya dalam satu file Excel">
+                            📁 Export Semua Produk &amp; Rekap
                           </button>
                           <button className="btn btn-primary" onClick={openNewEntry}>+ Catat Produksi</button>
                         </div>
