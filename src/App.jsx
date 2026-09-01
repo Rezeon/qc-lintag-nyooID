@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
-// 1. IMPORT FIREBASE AUTH
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
-
+import * as XLSX from "xlsx";
 /* ---------- constants ---------- */
 const BULAN_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -354,6 +353,42 @@ export default function App() {
     ? productEntries.filter((e) => monthKey(e.tanggal) === monthFilter)
     : productEntries;
 
+const exportToExcel = () => {
+    if (!selectedProduct || filteredEntries.length === 0) {
+      alert("Tidak ada data untuk diexport!");
+      return;
+    }
+
+    const dataFormatted = filteredEntries.map((e) => {
+      const c = computeRow(e, selectedProduct);
+      return {
+        "Tanggal": e.tanggal,
+        "Jumlah Batch": c.jumlahBatch,
+        "Hasil Packing (Pack)": c.hasilPacking,
+        "Jumlah Pcs": c.jumlahPcs,
+        "Massa Kotor (g)": c.massaKotor,
+        "Berat per Pack (g)": c.beratPerPack,
+        "Plastik Klip (g)": c.plastikKlip,
+        "Plastik Roll (g)": c.plastikRoll,
+        "Berat Bersih (g)": c.beratBersih,
+        "Total Berat Bersih + Bulk (g)": c.totalBeratBersihBulk,
+        "Bulk (g)": c.bulkGram,
+        "Berat Bersih Standar (g)": c.beratBersihStandar,
+        "Selisih (-/+) (g)": c.selisih,
+        "% Waste Adonan": (c.wasteAdonan * 100).toFixed(2) + "%",
+        "Sisa Pcs": c.sisaPcs,
+        "Total Pcs": c.totalPcs,
+        "Rata-rata / Batch": c.rataRataPerBatch.toFixed(1),
+        "Gramasi / Pcs": c.gramasiPerPcs.toFixed(2),
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataFormatted);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Input Produksi");
+    XLSX.writeFile(workbook, `MassBalance_${selectedProduct.kode}_${monthFilter || "Semua"}.xlsx`);
+  };
+
   // Global CSS Injection
 const globalStyles = (
     <style>{`
@@ -551,7 +586,14 @@ const globalStyles = (
                           </select>
                           <span style={{ fontSize: 12, color: "var(--sub)" }}>{filteredEntries.length} produksi tercatat</span>
                         </div>
-                        <button className="btn btn-primary" onClick={openNewEntry}>+ Catat Produksi</button>
+                        
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {/* TOMBOL DOWNLOAD EXCEL */}
+                          <button className="btn" style={{ background: "#107C41", color: "#fff", borderColor: "#107C41", fontSize: 12 }} onClick={exportToExcel}>
+                            📊 Download Excel
+                          </button>
+                          <button className="btn btn-primary" onClick={openNewEntry}>+ Catat Produksi</button>
+                        </div>
                       </div>
                       
                       {/* WRAPPER TABEL DENGAN STICKY HEADER OTOMATIS DI DALAM SCROLL CONTAINER */}
